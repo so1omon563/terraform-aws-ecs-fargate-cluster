@@ -21,8 +21,8 @@ provider "aws" {
 
 module "fargate-cluster" {
   #checkov:skip=CKV_AWS_224: "Ensure Cluster logging with CMK" - For this example, this is not required
-
-  source = "../../"
+  source  = "so1omon563/ecs-fargate-cluster/aws"
+  version = "1.0.0" # Ensure this is the latest version for your needs
 
   name = "example-cluster"
   tags = {
@@ -43,7 +43,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_fargate-cluster"></a> [fargate-cluster](#module\_fargate-cluster) | ../../ | n/a |
+| <a name="module_fargate-cluster"></a> [fargate-cluster](#module\_fargate-cluster) | so1omon563/ecs-fargate-cluster/aws | 1.0.0 |
 
 ## Resources
 
