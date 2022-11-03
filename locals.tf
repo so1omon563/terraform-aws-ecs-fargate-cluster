@@ -1,6 +1,8 @@
 locals {
-  tags = var.tags
+  tags         = var.tags
+  cluster_name = lower(var.cluster_name_override != null ? var.cluster_name_override : var.cluster_type == null ? var.name : format("%s-%s", var.name, var.cluster_type))
 
-  name       = var.topic_name_override != null ? var.topic_name_override : var.topic_prefix == null ? format("%s", var.name) : format("%s-%s", var.name, var.topic_prefix)
-  topic_name = var.fifo_topic ? format("%s.fifo", local.name) : local.name
+  # Used to dynamically generate blocks in the cluster resource
+  configuration     = var.execute_command_configuration != null ? { execute_command = "ignore" } : {}
+  log_configuration = var.log_configuration != null ? { log_configuration = "ignore" } : {}
 }

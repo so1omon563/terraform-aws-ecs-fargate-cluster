@@ -1,7 +1,6 @@
 name = "kitchen-default-example"
 
-topic_prefix        = "prefix-example"
-topic_name_override = "kitchen-override-example"
+cluster_name_override = "kitchen-override-example"
 
 tags = {
   environment = "dev"

@@ -2,9 +2,7 @@ variable "name" {}
 
 variable "tags" {}
 
-variable "topic_prefix" {}
-
-variable "topic_name_override" {}
+variable "cluster_name_override" {}
 
 provider "aws" {
   default_tags {
@@ -12,7 +10,8 @@ provider "aws" {
   }
 }
 
-module "sns" {
+module "fargate-cluster" {
+  #checkov:skip=CKV_AWS_224: "Ensure Cluster logging with CMK" - For this example, this is not required
   source = "../../../"
 
   name = var.name
@@ -20,26 +19,30 @@ module "sns" {
     example = "true"
   }
 }
-output "sns" { value = module.sns }
+output "fargate-cluster" { value = module.fargate-cluster }
 
-module "sns-prefix" {
+module "fargate-override-cluster" {
+  #checkov:skip=CKV_AWS_224: "Ensure Cluster logging with CMK" - For this example, this is not required
   source = "../../../"
 
-  name         = var.name
-  topic_prefix = var.topic_prefix
+  name = var.cluster_name_override
   tags = {
     example = "true"
   }
 }
-output "sns-prefix" { value = module.sns-prefix }
+output "fargate-override-cluster" { value = module.fargate-override-cluster }
 
-module "sns-override" {
+#tfsec:ignore:aws-ecs-enable-container-insight - For this example, this is specifically disabled
+module "fargate-insights-cluster" {
+  #checkov:skip=CKV_AWS_224: "Ensure Cluster logging with CMK" - For this example, this is not required
+  #checkov:skip=CKV_AWS_65: "Ensure container insights are enabled on ECS cluster" - For this example, this is specifically disabled
+
   source = "../../../"
 
-  name                = var.name
-  topic_name_override = var.topic_name_override
+  name               = format("%s-insights", var.name)
+  container_insights = "disabled"
   tags = {
     example = "true"
   }
 }
-output "sns-override" { value = module.sns-override }
+output "fargate-insights-cluster" { value = module.fargate-insights-cluster }

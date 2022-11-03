@@ -1,23 +1,112 @@
+
+variable "capacity_providers" {
+  description = "A list of capacity providers to enable on the ECS cluster."
+  type        = list(string)
+  default     = ["FARGATE", "FARGATE_SPOT"]
+}
+
+variable "cluster_name_override" {
+  type        = string
+  description = "Used if there is a need to specify a cluster name outside of the standardized nomenclature. For example, if importing a cluster that doesn't follow the standard naming formats."
+  default     = null
+}
+
+variable "cluster_type" {
+  type        = string
+  description = "One word descriptive type - A unique identifier to be appended to the `name` variable to name the resources."
+  default     = null
+}
+
+variable "container_insights" {
+  type        = string
+  description = "Can be either `enabled` or `disabled`. If `enabled`, the ECS cluster will be configured to use Container Insights"
+  default     = "enabled"
+
+  validation {
+    condition = contains([
+      "enabled",
+      "disabled",
+    ], var.container_insights)
+    error_message = "Valid values are limited to (enabled,disabled)."
+  }
+}
+
+variable "container_insights_log_kms_key_id" {
+  type        = number
+  description = "If `var.container_insights` is `enabled`, this is the KMS key ID of the specific Customer Managed Key you wish to use for encrypting logs. If not provided, the default CloudWatch encryption is used."
+  default     = null
+}
+
+variable "container_insights_log_retention_days" {
+  type        = number
+  description = "If `var.container_insights` is `enabled`, this is the time (in days) for how long to keep container insights logs."
+  default     = 365
+}
+
+variable "default_capacity_provider_strategy" {
+  description = <<EOT
+  Optional set of capacity provider strategies to use by default for the cluster.
+  Note that only one capacity provider can have a base defined.
+  Any others must supply a `null` value, as shown in the example below.
+
+  Example:
+```
+  [
+    {
+      base              = 1
+      weight            = 75
+      capacity_provider = "FARGATE"
+    },
+    {
+      base              = null
+      weight            = 25
+      capacity_provider = "FARGATE_SPOT"
+    }
+  ]
+```
+  EOT
+  type        = list(map(string))
+  default     = []
+}
+
+variable "execute_command_configuration" {
+  type = object({
+    kms_key_id = string
+    logging    = string
+  })
+  description = <<EOT
+
+  The details of the execute command configuration. If `logging` is set to `OVERRIDE`, you must also provide values for the `log_configuration` variable.
+
+  All values are required if using this variable, even if that value is `null`.
+
+  See the Terraform documentation for [`execute_command_configuration` in the `aws_ecs_cluster` resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster#configuration) for more information on the available options.
+  EOT
+  default     = null
+}
+
+variable "log_configuration" {
+  type = object({
+    cloud_watch_encryption_enabled = bool
+    cloud_watch_log_group_name     = string
+    s3_bucket_name                 = string
+    s3_bucket_encryption_enabled   = bool
+    s3_key_prefix                  = string
+  })
+  description = <<EOT
+
+  Optional set of log configuration options to use for with `execute_command_configuration`. Required if `logging` is set to `OVERRIDE`.
+
+  All values are required if using this variable, even if that value is `null`.
+
+  See the Terraform documentation for [`log_configuration` in the `aws_ecs_cluster` resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster#configuration) for more information on the available options.
+  EOT
+  default     = null
+}
+
 variable "name" {
   type        = string
-  description = "Short, descriptive name of the environment. All resources will be named using this value as a prefix. See [aws_sns_topic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic#name) for more information on name restrictions / requirements."
-}
-
-variable "topic_prefix" {
-  description = "SNS Topic name prefix, will be appended to `var.name` if a value is supplied. See [aws_sns_topic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic#name) for more information on name restrictions / requirements."
-  type        = string
-  default     = null
-}
-
-variable "topic_name_override" {
-  description = "Used if there is a need to specify a topic name outside of the standardized nomenclature. For example, if importing a topic that doesn't follow the standard naming formats. See [aws_sns_topic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic#name) for more information on name restrictions / requirements."
-  type        = string
-  default     = null
-}
-
-variable "display_name" {
-  type        = string
-  description = "The display name for the topic. If not specified, the display name will be the same as the topic name."
+  description = "Short, descriptive name of the environment. All resources will be named using this value as a prefix. This or `cluster_name_override` must be set."
   default     = null
 }
 
@@ -25,124 +114,4 @@ variable "tags" {
   type        = map(string)
   description = "A map of tag names and values for tags to apply to all taggable resources created by the module. Default value is a blank map to allow for using Default Tags in the provider."
   default     = {}
-}
-
-variable "policy" {
-  type        = string
-  description = "The JSON policy for the SNS topic. For more information about building AWS IAM policy documents with Terraform, see the [AWS IAM Policy Document Guide](https://learn.hashicorp.com/tutorials/terraform/aws-iam-policy?_ga=2.82257951.884055799.1634563672-272413849.1610471322)."
-  default     = null
-}
-
-variable "delivery_policy" {
-  type        = string
-  description = "The SNS delivery policy. More information can be found in the [AWS documentation](https://docs.aws.amazon.com/sns/latest/dg/sns-message-delivery-retries.html). Examples of using this variable can be found [here](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic)."
-  default     = null
-}
-
-variable "application_success_feedback_role_arn" {
-  type        = string
-  description = "ARN of the IAM role permitted to receive success feedback for this topic."
-  default     = null
-}
-
-variable "application_success_feedback_sample_rate" {
-  type        = number
-  description = "Percentage of success to sample."
-  default     = null
-}
-
-variable "application_failure_feedback_role_arn" {
-  type        = string
-  description = "ARN of the IAM role for failure feedback."
-  default     = null
-}
-
-variable "http_success_feedback_role_arn" {
-  type        = string
-  description = "ARN of the IAM role permitted to receive success feedback for this topic."
-  default     = null
-}
-
-variable "http_success_feedback_sample_rate" {
-  type        = number
-  description = "Percentage of success to sample."
-  default     = null
-}
-
-variable "http_failure_feedback_role_arn" {
-  type        = string
-  description = "ARN of the IAM role for failure feedback."
-  default     = null
-}
-
-variable "kms_master_key_id" {
-  type        = string
-  description = "The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see [Key Terms](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-server-side-encryption.html#sqs-sse-key-terms)."
-  default     = null
-}
-
-variable "fifo_topic" {
-  type        = bool
-  description = "Boolean indicating whether or not to create a FIFO (first-in-first-out) topic (default is **false**). Note that if enabling a FIFO topic, this module will automatically append the topic name with **.fifo**, per the naming requirements for FIFO topics."
-  default     = false
-}
-
-variable "content_based_deduplication" {
-  type        = bool
-  description = "Enables content-based deduplication for FIFO topics. For more information, see the [related documentation](https://docs.aws.amazon.com/sns/latest/dg/fifo-message-dedup.html)"
-  default     = false
-}
-
-variable "lambda_success_feedback_role_arn" {
-  type        = string
-  description = "ARN of the IAM role permitted to receive success feedback for this topic."
-  default     = null
-}
-
-variable "lambda_success_feedback_sample_rate" {
-  type        = number
-  description = "Percentage of success to sample."
-  default     = null
-}
-
-variable "lambda_failure_feedback_role_arn" {
-  type        = string
-  description = "ARN of the IAM role for failure feedback."
-  default     = null
-}
-
-variable "sqs_success_feedback_role_arn" {
-  type        = string
-  description = "ARN of the IAM role permitted to receive success feedback for this topic."
-  default     = null
-}
-
-variable "sqs_success_feedback_sample_rate" {
-  type        = number
-  description = "Percentage of success to sample."
-  default     = null
-}
-
-variable "sqs_failure_feedback_role_arn" {
-  type        = string
-  description = "ARN of the IAM role for failure feedback."
-  default     = null
-}
-
-variable "firehose_success_feedback_role_arn" {
-  type        = string
-  description = "ARN of the IAM role permitted to receive success feedback for this topic."
-  default     = null
-}
-
-variable "firehose_success_feedback_sample_rate" {
-  type        = number
-  description = "Percentage of success to sample."
-  default     = null
-}
-
-variable "firehose_failure_feedback_role_arn" {
-  type        = string
-  description = "ARN of the IAM role for failure feedback."
-  default     = null
 }
