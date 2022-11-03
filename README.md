@@ -1,11 +1,12 @@
 # Fargate ECS Cluster
 
-Build an Fargate ECS cluster and related resources. The options here are designed specifically with Fargate in mind, and are not designed to work with EC2 instances.
+Build a Fargate ECS cluster and related resources. The options here are designed specifically with Fargate in mind, and are not designed to work with EC2 instances.
 
 This module enables Container Insights by default, and creates a log group for them named `/aws/ecs/containerinsights/$CLUSTER_NAME/performance`
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 Auto-generated technical documentation is created using [`terraform-docs`](https://terraform-docs.io/)
+
 ## Examples
 
 ```hcl
@@ -61,6 +62,5 @@ No modules.
 | <a name="output_cluster_id"></a> [cluster\_id](#output\_cluster\_id) | The ID of the ECS cluster created by this module. |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The name of the ECS cluster created by this module. |
 | <a name="output_container_insights"></a> [container\_insights](#output\_container\_insights) | A collection of all outputs from the Container Insights Log Group. |
-
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
