@@ -1,8 +1,25 @@
-variable "name" {}
+terraform {
+  required_version = ">= 0.14"
 
-variable "tags" {}
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.38"
+    }
+  }
+}
 
-variable "cluster_name_override" {}
+variable "name" {
+  type = string
+}
+
+variable "tags" {
+  type = map(string)
+}
+
+variable "cluster_name_override" {
+  type = string
+}
 
 provider "aws" {
   default_tags {
